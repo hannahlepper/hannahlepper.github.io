@@ -1,7 +1,6 @@
 ---
-title: CV
+title: About
 ---
-# Brief CV
 
 ### Research interests
 I am an interested in understanding the processes underlying infectious disease dynamics by using modelling techniques and data, to inform prediction and control. 

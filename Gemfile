@@ -3,9 +3,11 @@
 source "https://rubygems.org"
 
 # gem "rails"
-gem "jekyll"
+# gem "jekyll"
 
-group :jekyll_plugins do
-    gem 'jekyll-remote-theme'
-    gem 'jekyll-seo-tag'
-  end
+gem "github-pages", group: :jekyll_plugins
+
+#group :jekyll_plugins do
+#    gem 'jekyll-remote-theme'
+#    gem 'jekyll-seo-tag'
+#  end

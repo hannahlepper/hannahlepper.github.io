@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Covid Model</title>
+        <link rel="stylesheet" href="/assets/css/styles.css">
+    </head>
+  <body>
+    <nav>
+    
+      <a href="/" >Home</a>
+    
+      <a href="/about.html" >About</a>
+    
+      <a href="/Publications.html" >Publications</a>
+    
+      <a href="/posts.html" >Blog</a>
+    
+  </nav>
+    <h1>Covid Model</h1>
+
+<h1 id="what-is-the-impact-of-being-more-cautious-if-you-know-covid-cases">What is the impact of being more cautious if you know COVID cases?</h1>
+
+<h3 id="the-idea">The idea</h3>
+
+<p>Whilst self-isolating with Christmas-acquired COVID-19, I wondered if a) peole were more cautious about social mixing is people they knew had recently had COVID-19, and b) if this could delay the epidemic peak or change the resulting number of cases.</p>
+
+<p>Using a simple transmission model with an SEIR structure and some quick probability theory, I tested this idea in a theoretical way.</p>
+
+<h3 id="how-many-covid-cases-does-the-average-person-know">How many COVID cases does the average person know?</h3>
+
+<p>To set up the model, we need to know how many cases people know on average.</p>
+
+<p>The probability that any one person is or has been a case in the current variant epidemic is C = (I + R)/N.</p>
+
+<p>Assuming that everyone has the same size of social circle ω, the average number of cases a person knows is simply x(t) = Cω.</p>
+
+<p>I also wanted transmission avoiding behavious to depend on how many COVID cases you know - it seems plausible that the more cases we know, the more cautious we think we should be.</p>
+
+<p>I hypothesised (wildly) that cautiousness is a sigmoid function of the number of people you know who are cases. i.e. knowing one or two cases doesn’t worry you too much, but after you know a threshold number you reach cautiousness saturation.</p>
+
+<p>Decrease in transmission risk at time t (or cautiousness) is:</p>
+
+<p>σ(t) = σ<sup> * </sup>(1/(1 + exp(-κ(x(t) - x<sub>m</sub>))))</p>
+
+<p>Here, σ<sup>*</sup> is a maximum cautiousness level], κ is a measure of steepness of the curve, and x<sub>m</sub> is the mid point, or in our case at what number of cases known are we at half the level of our maximum cautiousness.</p>
+
+<p>Using different maximum cautiousness levels, κ = 5 and x<sub>m</sub> = 3, our function looks like this:</p>
+
+<p><img src="/assets/images/sigmoid_transmission.png" alt="a" /></p>
+
+<p>It may also be interesting to know the proportion of the population who know at least one case. We can calculate this using the chance that not one of the people you know is a case, i.e. (1 - C)<sup>ω</sup>. Therefore, the chance that you know at least one case is p<sub>k</sub> = 1 - (1 - C)<sup>ω</sup>.</p>
+
+<h3 id="the-model">The model</h3>
+
+<p>I use the rapid review on COVID-19 modelling from the Royal Society (Royal Soc, 2020) for setting up the model and parameters.</p>
+
+<p>Assuming density dependent transmission and a fully mixing population, the ODE set looks like this:</p>
+
+<p>dS/dt = - βσ(t)SI</p>
+
+<p>dE/dt =  βσ(t)SI - αE</p>
+
+<p>dI/dt = αE - γI</p>
+
+<p>dR/dt = γI</p>
+
+<p>The model and results generating code is available on GitHub:</p>
+
+<h3 id="model-intialisation-and-parameters">Model intialisation and parameters</h3>
+
+<p>Next I parameterised the model. I assumed a population of 10,000, and a social circle of 100. The time step was 1 day, and the model was run for one year. Model runs were started with 1 infectious case, and S*(1 - (1 - 1/N)<sup>ω</sup>) people in the S<sub>k</sub> compartment.</p>
+
+<p>The latency or incubation period I took to be 5 days, with the rate of transition from one day to the next being 1/5.</p>
+
+<p>The duration of infectiousness varies depending on the severity of the case and method of estimation (e.g. Bryne et al, 2020), but seems to be 5 - 10 days. Taking the median 7.5 days, the rate of recovery from infectiousness is 1/7.5.</p>
+
+<p>Using R<sub>0</sub> and &amp;gamma, we can estimate β from the classic epidemiological formula R<sub>0</sub> = βN/γ. The R<sub>0</sub> for the omicron variant is thought to be just under 7 (Burki, 2021). So I estimated β to be (7 * 1/7.5)/10,000.</p>
+
+<h3 id="results">Results</h3>
+
+<p>Firstly I plotted the epidemic curve. Here is I (number infected) for five σ<sup>*</sup> scenarios: 0, 0.2, 0.5, 0.8, and 0.99 proportion decreases in transmission risk at maximum cautiousness. The increased cautiousness can lead to a delayed, lower peak in numbers of infectious people at medium levels. At a high level the peak is not delayed but is squashed.</p>
+
+<p><img src="/assets/images/epidemic_curve.png" alt="a" /></p>
+
+<p>By the end of 1 year, in cautiousness scenarios below 0.95 everyone in the population had been a case. This could partly be due to fewer infections occurring over the period of the epidemic from the high level of cautiousness and to the system not having reached equilibrium some the highest values of σ<sup> * </sup>.</p>
+
+<p><img src="/assets/images/number_of_cases.png" alt="a" /></p>
+
+<p>The effect of level of cautiousness on infection dynamics was apparent a few days after the infection was introduced, so the proportion of the population that knows at least one person who is or has been a case</p>
+
+<p><img src="/assets/images/proportion_known.png" alt="a" /></p>
+
+<h3 id="thoughts">Thoughts</h3>
+
+<p>If people are a little cautious when they know cases, there could lead to deceleration in the force of infection and a delayed epidemic peak without impacting overall case numbrs. If people are extremely cautious when you know a certain number of cases there could be a reduction in the total number of cases.</p>
+
+<p>Most infections were happening in the first 2 weeks after COVID-19 was introduced, so the impact of this effect would be at the start of the epidemic. This is likely to be the reason that cautiousness does not have a big effect unless is is very high (0.95 or more): the virus was spreading too quickly for people’s ‘cautiousness’ to have an effect.</p>
+
+<p>However, it is not a realistic model prediction that 100% of the population catched COVID-19, as this has not been observed. In this model, they do because I have not taken into accoun vaccinated-derived or natural immunity in the population, government restrictions (social distancing, contact tracing, and self-isolation), stochastic processes, heterogeneity, and assortative mixing patterns. These factors reduce the rate of transmission and protect some of the population from infection. I am therefore over-estimating how much transmission there will be.</p>
+
+<p>One more thought - many COVID cases are not observed. Could the number of COVID cases that people report knowing be a good surveillance target tf we had a good model of the relationship between the number of known cases and real cases?</p>
+
+<h3 id="references">References</h3>
+
+<p>Royal Society Science in Emergencies Tasking - COVID (SET-C) Committee (2020). Reproduction number (R) and growth rate (r) of the COVID-19 epidemic in the UK: methods of estimation, data sources, causes of heterogeneity, and use as a guide in policy formulation. https://royalsociety.org/-/media/policy/projects/set-c/set-covid-19-R-estimates.pdf</p>
+
+<p>Burki, T. K. (2021). Omicron variant and booster COVID-19 vaccines. Lancet Respiratory Medicine. doi:10.1016/S2213-2600(21)00559-2</p>
+
+<p>Byrne, A. W., McEvoy, D., Collins, A. B., et al (2020). Inferred duration of infectious period of SARS-CoV-2: rapid scoping review and analysis of available evidence for asymptomatic and symptomatic COVID-19 cases. BMJ Open 10:e039856. doi:10.1136/bmjopen-2020-039856</p>
+
+
+  </body>
+</html>
